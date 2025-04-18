@@ -5,7 +5,11 @@ Sudoku is fun to play, but you get stuck sometimes. Erasing the numbers to solve
 
 
 ### ⚙️How to use:
+Take a picture and add the file to the same folder as the code.
 
+Run the code.
+
+Ta-da!
 
 
 ### 🎉What you will get:
