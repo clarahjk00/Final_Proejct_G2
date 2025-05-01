@@ -2,10 +2,10 @@
 import time
 import copy
 import numpy as np
-# import cv2
-# import matplotlib.pyplot as plt
-# from PIL import Image
-# import pytesseract
+import cv2
+import matplotlib.pyplot as plt
+from PIL import Image
+import pytesseract
 
 
 class SudokuBoard:
@@ -126,6 +126,50 @@ class SudokuSolver:
     """
     Class to solve the Sudoku puzzle using backtracking.
     """
+
+    def __init__(self, sudoku_board):
+        """Initialize with a SodokuBoard object."""
+        self.board = sudoku_board
+        self.solved_board = None
+        self.solving_time = 0
+
+    def solve(self):
+        """Solve the Sudoku puzzle using backtracking."""
+
+        self.solved_board = copy.deepcopy(self.board) #creates a copy of the board to solve
+        start_time = time.time() #start timing
+        success = self._solve_backtracking() #call the recursive backtracking solver
+        self.solving_time = time.time() - start_time #end timing
+
+        return success  
+    
+    def _solve_backtracking(self):
+        """Recursive backtracking algo to solve the puzzle."""
+
+        empty_cell = self.solved_board.find_empty() #find an empty cell
+
+        #if no empty cell is found, the puzzle is solved!
+        if empty_cell is None:
+            return True
+        
+        row, col = empty_cell
+
+        #try digits 1-9 for this empty cell
+        for num in range(1,10):
+
+            #check if the digit is valid in this position
+            if self.solved_board.is_valid(row, col, num):
+                self.solved_board.board[row, col] = num #place the digit
+
+                #recursively solve the rest of the puzzle
+                if self._solve_backtracking():
+                    return True 
+                
+                self.solved_board.board[row,col] = 0 #backtrack by setting the cell to 0
+
+        #no digits worked, so this puzzle is unsolvable 
+        return False
+
 
 
 
