@@ -170,6 +170,17 @@ class SudokuSolver:
         #no digits worked, so this puzzle is unsolvable 
         return False
 
+    def display_solution(self):
+        """Displays the soln."""
+
+        if self.solved_board is None:
+            print("The puzzle hasn't been solved yet.")
+            return
+        
+        print("\nSolution:")
+        self.solved_board.display()
+        print(f"Solving time: {self.solving_time:.3f} seconds")
+
 
 
 
