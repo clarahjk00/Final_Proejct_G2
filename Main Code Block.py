@@ -164,7 +164,7 @@ class SudokuBoard:
         self.display()
         return True
     
-     def _apply_perspective_transform(self, image, contour):
+    def _apply_perspective_transform(self, image, contour):
         """Apply perspective transform to get a top-down view of the grid"""
         # Find the corners of the grid
         rect = self._order_points(contour.reshape(len(contour), 2))
