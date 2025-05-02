@@ -35,8 +35,8 @@ class SudokuBoard:
         """
         Initialize the Sudoku board (9x9 grid).
         """
-        self.board = np.zeros((9, 9), dtype=int)                       # Create a 9x9 grid for the Sudoku board
-        self.original = np.zeros((9, 9), dtype=bool)                   # Keep track of original numbers
+        self.board = np.zeros((9, 9), dtype=int)  #main 9x9 grid 
+        self.original = np.zeros((9, 9), dtype=bool) #keeps track of which numbers were filled in by the user
 
 
     def load_user_input(self):
@@ -45,29 +45,32 @@ class SudokuBoard:
         """
         print("Enter your sudoku row by row.")
         print("Use 0 or . for empty cells.")
-        print("=" * 35)                                                # Separator for better readability
+        print("=" * 35) #visual divider 
 
         for i in range(9):
             valid_input = False
             while not valid_input:
-                row_input = input(f"Enter row {i + 1} (9 digits): ")
-                row_input = row_input.replace(" ", "").replace(".","0") # Remove spaces and replace '.' with '0'
+                row_input = input(f"Enter row {i + 1} (9 digits): ") #ask for one row of numbers 
+                row_input = row_input.replace(" ", "").replace(".","0") #clean up the input, removes spaces and turn '.' into 0
 
+                #check that there are only 9 characters 
                 if len(row_input) !=9:
                     print("Error: Entered row must be 9 digits long.")
                     continue
 
                 try:
-                    row = [int(cell) for cell in row_input]             # Convert each character to an integer
+                    row = [int(cell) for cell in row_input] #turn each character into a number
+                    #make sure all numbers are between 0 and 9
                     if not all(0 <= cell <= 9 for cell in row):
                         print("Error: Digits must be between 0 and 9.")
                         continue
 
-                    valid_input = True
-                    self.board[i] = row                                 # Save the row to the board
+                    valid_input = True #if we made it here, the input is valid
+                    self.board[i] = row  #save the row to the board
 
+                    #mark the numbers that aren't zero as original
                     for j in range(9):
-                        if row[j] != 0:                                 # If the cell is not empty, mark it as original
+                        if row[j] != 0:      
                             self.original[i][j] = True
 
                 except ValueError:
@@ -76,7 +79,7 @@ class SudokuBoard:
         print("=" * 35)
         print("\nSudoku board loaded successfully.\n")
         print("=" * 35)
-        self.display()                                                  # Display the loaded Sudoku board
+        self.display()  #show the board 
 
     def load_from_image(self, image_path):
         """
