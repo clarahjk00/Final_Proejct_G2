@@ -26,8 +26,7 @@ Ensure the image file is saved on your computer (preferably in the same folder a
 The following picture format is supported:
 + JPEG (.jpg, .jpeg)
 + PNG (.png)
-+ BMP (.bmp)
-+ TIFF (.tiff, .tif)
+
 
 #### Step 1. Run the code
 Once you run the code, you get to pick an option. Type the number of your desired option and hit enter.
