@@ -67,4 +67,3 @@ Nithya Parthasarathi (nparthasarathi17 | npartha2@jh.edu)
 Clara Hyeonji Kim (clarahjk00 | hkim348@jh.edu)
 + Updating README
 + Code the Sudoku board class
-+ Code the user interaction
