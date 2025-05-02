@@ -153,11 +153,11 @@ class SudokuBoard:
                     digit = self._recognize_digit(cell_images[cell_idx])
                     self.board[i, j] = digit
                     if digit != 0:
-                        # Mark original clues (pre-filled digits)
+                        #mark original clues (pre-filled digits)
                         self.original_cells[i, j] = True
                 except Exception as e:
                     print(f"Warning: Failed to recognize digit at cell ({i}, {j}): {e}")
-                    self.board[i, j] = 0  # Default to empty if recognition fails
+                    self.board[i, j] = 0  #default to empty if recognition fails
 
         #display the final loaded board
         print("\nLoaded Sudoku puzzle from image:")
