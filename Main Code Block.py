@@ -59,6 +59,88 @@ class SudokuBoard:
         print("=" * 35)
         self.display()                                                  # Display the loaded Sudoku board
 
+    def load_from_image(self, image_path):
+        """
+        Load a Sudoku puzzle from an image file.
+        Applies preprocessing, perspective correction, splits grid, and uses OCR to detect digits.
+        """
+        print(f"Loading puzzle from image: {image_path}")
+
+        #load the image from disk
+        image = cv2.imread(image_path)
+        if image is None:
+            print(f"Error: Could not open or find the image at {image_path}")
+            return False
+
+        #convert the image to grayscale
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+        #apply Gaussian blur to reduce noise and improve thresholding
+        blurred = cv2.GaussianBlur(gray, (7, 7), 0)
+
+        #apply adaptive thresholding to get a binary image with inverted colors
+        thresh = cv2.adaptiveThreshold(
+            blurred, 255,
+            cv2.ADAPTIVE_THRESH_GAUSSIAN_C,  #use a weighted sum of neighborhood values
+            cv2.THRESH_BINARY_INV,           #invert the colors: digits become white
+            11, 2                            #block size and constant for adaptive threshold
+        )
+
+        #detect contours in the binary image
+        contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        if not contours:
+            print("Error: No contours found in the image.")
+            return False
+
+        #select the largest contour, assuming it is the Sudoku grid
+        largest_contour = max(contours, key=cv2.contourArea)
+
+        #approximate the contour to a 4-point polygon
+        peri = cv2.arcLength(largest_contour, True)
+        approx = cv2.approxPolyDP(largest_contour, 0.02 * peri, True)
+
+        #check if the polygon has exactly 4 corners
+        if len(approx) != 4:
+            print(f"Error: Could not find a proper grid (found {len(approx)} points instead of 4).")
+            return False
+
+        #try to apply a perspective transform to get a top-down view of the grid
+        try:
+            grid_image = self._apply_perspective_transform(gray, approx)
+        except Exception as e:
+            print(f"Error during perspective transform: {e}")
+            return False
+
+        #try to split the corrected grid image into 81 cell images
+        try:
+            cell_images = self._split_grid(grid_image)
+        except Exception as e:
+            print(f"Error splitting grid into cells: {e}")
+            return False
+
+        # Initialize the board and marker for original (pre-filled) cells
+        self.board = np.zeros((9, 9), dtype=int)
+        self.original_cells = np.zeros((9, 9), dtype=bool)
+
+        #loop through each of the 81 cells to detect digits
+        for i in range(9):
+            for j in range(9):
+                cell_idx = i * 9 + j
+                try:
+                    #recognize digit in the current cell image
+                    digit = self._recognize_digit(cell_images[cell_idx])
+                    self.board[i, j] = digit
+                    if digit != 0:
+                        # Mark original clues (pre-filled digits)
+                        self.original_cells[i, j] = True
+                except Exception as e:
+                    print(f"Warning: Failed to recognize digit at cell ({i}, {j}): {e}")
+                    self.board[i, j] = 0  # Default to empty if recognition fails
+
+        #display the final loaded board
+        print("\nLoaded Sudoku puzzle from image:")
+        self.display()
+        return True
 
     def display(self):
         """
