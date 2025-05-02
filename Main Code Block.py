@@ -141,6 +141,90 @@ class SudokuBoard:
         print("\nLoaded Sudoku puzzle from image:")
         self.display()
         return True
+    
+     def _apply_perspective_transform(self, image, contour):
+        """Apply perspective transform to get a top-down view of the grid"""
+        # Find the corners of the grid
+        rect = self._order_points(contour.reshape(len(contour), 2))
+        
+        # Define the destination points for the transform (a square)
+        side_length = 900  # The target size of our grid
+        dst = np.array([
+            [0, 0],
+            [side_length - 1, 0],
+            [side_length - 1, side_length - 1],
+            [0, side_length - 1]
+        ], dtype="float32")
+        
+        # Calculate the perspective transform matrix and apply it
+        transform_matrix = cv2.getPerspectiveTransform(rect, dst)
+        warped = cv2.warpPerspective(image, transform_matrix, (side_length, side_length))
+        
+        return warped
+    
+    def _order_points(self, pts):
+        """Order points in top-left, top-right, bottom-right, bottom-left order"""
+        # Sort by sum of coordinates to get top-left and bottom-right
+        s = pts.sum(axis=1)
+        top_left = pts[np.argmin(s)].astype("float32")
+        bottom_right = pts[np.argmax(s)].astype("float32")
+        
+        # Sort by difference of coordinates to get top-right and bottom-left
+        diff = np.diff(pts, axis=1)
+        top_right = pts[np.argmin(diff)].astype("float32")
+        bottom_left = pts[np.argmax(diff)].astype("float32")
+        
+        return np.array([top_left, top_right, bottom_right, bottom_left], dtype=np.float32)
+    
+    def _split_grid(self, grid_image):
+        """Split the Sudoku grid into 81 individual cells"""
+        cell_images = []
+        cell_size = grid_image.shape[0] // 9
+        
+        for i in range(9):
+            for j in range(9):
+                # Extract cell with some margin to avoid grid lines
+                margin = int(cell_size * 0.1)
+                x = j * cell_size + margin
+                y = i * cell_size + margin
+                width = cell_size - 2 * margin
+                height = cell_size - 2 * margin
+                
+                cell = grid_image[y:y+height, x:x+width]
+                cell_images.append(cell)
+        
+        return cell_images
+    
+    def _recognize_digit(self, cell_image):
+        """Recognize digit in a Sudoku cell using OCR"""
+        try:
+            # Thresholding to make the digit clearer
+            _, thresh = cv2.threshold(cell_image, 128, 255, cv2.THRESH_BINARY_INV)
+            
+            # Check if cell is mostly empty (no digit)
+            if np.sum(thresh) / 255 < cell_image.size * 0.1:
+                return 0
+            
+            # Add padding around the digit
+            padded = cv2.copyMakeBorder(thresh, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=0)
+            
+            # Use pytesseract to recognize the digit
+            config = '--psm 10 --oem 3 -c tessedit_char_whitelist=123456789'
+            digit_text = pytesseract.image_to_string(padded, config=config).strip()
+            
+            # Try to parse the digit
+            try:
+                digit = int(digit_text)
+                if 1 <= digit <= 9:
+                    return digit
+            except (ValueError, IndexError):
+                pass
+            
+            return 0  # Return 0 if no valid digit was recognized
+        except Exception as e:
+            print(f"OCR failed: {e}")
+            print("Returning 0 for this cell. Consider using manual input instead.")
+            return 0
 
     def display(self):
         """
@@ -276,8 +360,8 @@ def main():
     while True:
         print("\nSudoku Solver")
         print("1. Load Sudoku from manual input")
-        # print("2. Load Sudoku from image")
-        # print("3. Solve Sudoku")
+        print("2. Load Sudoku from image")
+        print("3. Solve Sudoku")
         print("4. Quit")
 
         choice = input("\nEnter your choice: ")
@@ -287,9 +371,24 @@ def main():
             board.load_user_input()  # Load Sudoku from user input
             print("=" * 35)
 
-        # elif choice == '2':
+        elif choice == '2':
+            image_path = input("Enter the path to the Sudoku image: ")
+            success = board.load_from_image(image_path)
+            if not success:
+                print("Failed to load puzzle from image. Try again or use manual input.")
+        
+        elif choice == '3':
+            # Check if board is empty
+            if np.sum(board.board) == 0:
+                print("Board is empty. Please load a puzzle first.")
+                continue
 
-        # elif choice == '3':
+            print("\nSolving puzzle...")
+            solver = SudokuSolver(board)
+            if solver.solve():
+                solver.display_solution()
+            else:
+                print("No solution :(")
             
         elif choice == '4':
             print("=" * 35)
