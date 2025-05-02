@@ -183,7 +183,6 @@ class SudokuSolver:
 
 
 
-
 def main():
     """
     Main function to run the code.
