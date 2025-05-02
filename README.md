@@ -37,7 +37,7 @@ Once you run the code, you get to pick an option. Type the number of your desire
 Enter 9 rows, each containing 9 digits.\
 Use `0` or `.` for empty cells.
 
-Example input:
+Example input using `board1.png`:
 
 2️⃣ **Option 2. Image input**
 
