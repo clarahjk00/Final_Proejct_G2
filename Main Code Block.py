@@ -1,4 +1,23 @@
 # Main Code Block
+
+"""
+Sudoku Solver with OCR and Backtracking!
+By: Clara Kim & Nithya Parthasarathi
+
+This project is a Sudoku solver that can solve puzzles in two ways:
+1.  Accepting user manual input for the Sudoku board
+2.  Accepting an image of Sudoku board form the user
+
+For the image processing part, the solver uses:
+- OpenCV for image processing - it detects and extracts the Sudoku grid from the image
+- Tesseract OCR (via pytesseract) - it reads the digits from the extracted cells using 
+Optical Character Recognition (OCR), coverting the images of the numebrs into integers. 
+
+The solver uses a backtracking algorithm to solve the Sudoku puzzle. The solved Sudoku board 
+is displayed to the user, along with the time taken to solve it.
+"""
+
+
 import time
 import copy
 import numpy as np
@@ -400,7 +419,6 @@ def main():
         else:
             print("Error: Invalid choice. Please try again.")
             continue
-
 
 if __name__ == "__main__":
     main()  # Run the main function
