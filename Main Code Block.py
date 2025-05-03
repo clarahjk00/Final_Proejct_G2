@@ -218,32 +218,32 @@ class SudokuBoard:
         return cell_images
     
     def _recognize_digit(self, cell_image):
-        """Recognize digit in a Sudoku cell using OCR"""
+        """Recognize digit in a Sudoku cell using OCR (Tesseract)."""
         try:
-            # Thresholding to make the digit clearer
+            #make the digit stand out more by inverting the colors 
             _, thresh = cv2.threshold(cell_image, 128, 255, cv2.THRESH_BINARY_INV)
             
-            # Check if cell is mostly empty (no digit)
+            #if hthe cell is mostly empty (not much white), assume it's blank
             if np.sum(thresh) / 255 < cell_image.size * 0.1:
                 return 0
             
-            # Add padding around the digit
+            #add some space aroumd the digit to help Tesseract read it 
             padded = cv2.copyMakeBorder(thresh, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=0)
             
-            # Use pytesseract to recognize the digit
+            #tesseract configuration: treat image as a single character, and only look for digits 1-9
             config = '--psm 10 --oem 3 -c tessedit_char_whitelist=123456789'
             digit_text = pytesseract.image_to_string(padded, config=config).strip()
             
-            # Try to parse the digit
+            #try converting the result into an integer 
             try:
                 digit = int(digit_text)
                 if 1 <= digit <= 9:
                     return digit
             except (ValueError, IndexError):
                 pass
-            
-            return 0  # Return 0 if no valid digit was recognized
-        except Exception as e:
+            return 0  #if tesseract didn't return a valid digit, return 0 
+        
+        except Exception as e: #something went wrong 
             print(f"OCR failed: {e}")
             print("Returning 0 for this cell. Consider using manual input instead.")
             return 0
@@ -252,21 +252,24 @@ class SudokuBoard:
         """
         Print the Sudoku board in a readable format.
         """
-        print("-" * 29)
+        print("-" * 29) #top border
         for i in range(9):
             row = ""
             for j in range(9):
+                #show a dot for empty cells 
                 if self.board[i][j] == 0:
-                    row += " . "                                        # Use '.' for empty cells
+                    row += " . "                                
                 else:
                     row += f" {self.board[i][j]} "
 
+                #add vertical line every 3 cols
                 if (j + 1) % 3 == 0 and j != 8:
-                    row += "|"                                          # Add vertical separator every 3 columns
+                    row += "|"                                  
             print(row)
 
+            #add horizontal separator every 3 rows
             if (i + 1) % 3 == 0:
-                print("-" * 29)                                         # Add horizontal separator every 3 rows
+                print("-" * 29)                                         
 
 
     def is_valid(self, row, col, num):
@@ -278,20 +281,27 @@ class SudokuBoard:
             col (int): Column index (0-8).
             num (int): Number to check (1-9).
         """
+
+        #check if the number already exists in this col
         for i in range(9):
-            if self.board[i, col] == num:                               # Check the row
+            if self.board[i, col] == num:                              
                 return False
-            
+
+        #check if the number already exists in this row 
         for j in range(9):
-            if self.board[row, j] == num:                               # Check the column
+            if self.board[row, j] == num:                          
                 return False
-            
+        
+        #figure out where the 3x3 subgrid starts 
         start_row, start_col = 3 * (row // 3), 3 * (col // 3)
 
-        for i in range(start_row, start_row + 3):                       # Check the 3x3 subgrid
+        #check if the num is already in teh same 3x3 box
+        for i in range(start_row, start_row + 3):                       
             for j in range(start_col, start_col + 3):
                 if self.board[i, j] == num:
                     return False
+        
+        #if all checks are passed, it's valid move 
         return True
     
 
@@ -305,10 +315,8 @@ class SudokuBoard:
         for i in range(9):
             for j in range(9):
                 if self.board[i][j] == 0:
-                    return (i, j)
-        return None
-
-
+                    return (i, j) #found an empty spot
+        return None #no more empty spots 
 
 class SudokuSolver:
     """
