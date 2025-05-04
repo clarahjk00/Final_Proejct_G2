@@ -160,7 +160,9 @@ class SudokuBoard:
                     self.board[i, j] = 0  #default to empty if recognition fails
 
         #display the final loaded board
+        print("=" * 35)
         print("\nLoaded Sudoku puzzle from image:")
+        print("")
         self.display()
         return True
     
@@ -373,6 +375,7 @@ class SudokuSolver:
             print("The puzzle hasn't been solved yet.")
             return
         
+        print("=" * 35)
         print("\nSolution:")
         self.solved_board.display()
         print(f"Solving time: {self.solving_time:.3f} seconds")
@@ -402,23 +405,34 @@ def main():
             print("=" * 35)
 
         elif choice == '2':
+            print("=" * 35)
             image_path = input("Enter the path to the Sudoku image: ")
             success = board.load_from_image(image_path)
+            print("")
+            print("=" * 35)
             if not success:
                 print("Failed to load puzzle from image. Try again or use manual input.")
         
         elif choice == '3':
             # Check if board is empty
             if np.sum(board.board) == 0:
-                print("Board is empty. Please load a puzzle first.")
+                print("=" * 35)
+                print("\nBoard is empty. Please load a puzzle first.")
+                print("")
+                print("=" * 35)
                 continue
-
+            
+            print("=" * 35)
             print("\nSolving puzzle...")
             solver = SudokuSolver(board)
             if solver.solve():
                 solver.display_solution()
+                print("")
+                print("=" * 35)
             else:
-                print("No solution :(")
+                print("=" * 35)
+                print("\nNo solution :(")
+                print("=" * 35)
             
         elif choice == '4':
             print("=" * 35)
