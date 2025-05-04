@@ -226,17 +226,32 @@ class SudokuBoard:
             _, thresh = cv2.threshold(cell_image, 128, 255, cv2.THRESH_BINARY_INV)
             
             #if hthe cell is mostly empty (not much white), assume it's blank
-            if np.sum(thresh) / 255 < cell_image.size * 0.1:
+            if np.sum(thresh) / 255 < cell_image.size * 0.05:
                 return 0
             
             #add some space aroumd the digit to help Tesseract read it 
-            padded = cv2.copyMakeBorder(thresh, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=0)
+            padded = cv2.copyMakeBorder(thresh, 20, 20, 20, 20, cv2.BORDER_CONSTANT, value=0)
             
             #tesseract configuration: treat image as a single character, and only look for digits 1-9
             config = '--psm 10 --oem 3 -c tessedit_char_whitelist=123456789'
             digit_text = pytesseract.image_to_string(padded, config=config).strip()
             
             #try converting the result into an integer 
+            try:
+                digit = int(digit_text)
+                if 1 <= digit <= 9:
+                    return digit
+            except (ValueError, IndexError):
+                pass
+
+            #second try if first one fails
+            #enhance the white region of the image to help Tesseract read it better
+            kernel = np.ones((3, 3), np.uint8)  #create a kernel for dilation
+            dilated = cv2.dilate(thresh, kernel, iterations=1)  #dilate the image to make the digits more prominent
+            kernel_padded = cv2.copyMakeBorder(dilated, 20, 20, 20, 20, cv2.BORDER_CONSTANT, value=0)
+
+            digit_text = pytesseract.image_to_string(kernel_padded, config=config).strip()
+
             try:
                 digit = int(digit_text)
                 if 1 <= digit <= 9:
