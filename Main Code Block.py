@@ -54,7 +54,7 @@ class SudokuBoard:
                 row_input = row_input.replace(" ", "").replace(".","0") #clean up the input, removes spaces and turn '.' into 0
 
                 #check that there are only 9 characters 
-                if len(row_input) !=9:
+                if len(row_input) != 9:
                     print("Error: Entered row must be 9 digits long.")
                     continue
 
