@@ -74,7 +74,9 @@ A fully solved Sudoku puzzle is printed to your terminal—no more guesswork or 
 Nithya Parthasarathi (nparthasarathi17 | npartha2@jh.edu)
 + Initial logic
 + Code solver and image processing
++ Unittest
  
 Clara Hyeonji Kim (clarahjk00 | hkim348@jh.edu)
 + Updating README
 + Code the Sudoku board class
++ Additional edits in image processing
